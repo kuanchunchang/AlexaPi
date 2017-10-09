@@ -139,7 +139,7 @@ class Player(object):
 
 			url = stream['streamUrl']
 			if stream['streamUrl'].startswith("cid:"):
-				url = "file://" + tmp_path + hashlib.md5(stream['streamUrl'].replace("cid:", "", 1)).hexdigest() + ".mp3"
+				url = "file://" + tmp_path + hashlib.md5(stream['streamUrl'].replace("cid:", "", 1).encode()).hexdigest() + ".mp3"
 
 			if (url.find('radiotime.com') != -1):
 				url = self.tunein_playlist(url)
@@ -430,7 +430,7 @@ def process_response(response):
 				j = json.loads(payload.get_payload())
 				logger.debug("JSON String Returned: %s", json.dumps(j, indent=2))
 			elif payload.get_content_type() == "audio/mpeg":
-				filename = tmp_path + hashlib.md5(payload.get('Content-ID').strip("<>")).hexdigest() + ".mp3"
+				filename = tmp_path + hashlib.md5(payload.get('Content-ID').strip("<>").encode()).hexdigest() + ".mp3"
 				with open(filename, 'wb') as f:
 					f.write(payload.get_payload(decode=True))
 			else:
@@ -444,7 +444,7 @@ def process_response(response):
 			for directive in j['messageBody']['directives']:
 				if directive['namespace'] == 'SpeechSynthesizer':
 					if directive['name'] == 'speak':
-						player.play_speech("file://" + tmp_path + hashlib.md5(directive['payload']['audioContent'].replace("cid:","",1)).hexdigest() + ".mp3")
+						player.play_speech("file://" + tmp_path + hashlib.md5(directive['payload']['audioContent'].replace("cid:", "", 1).encode()).hexdigest() + ".mp3")
 
 				elif directive['namespace'] == 'SpeechRecognizer':
 					if directive['name'] == 'listen':
